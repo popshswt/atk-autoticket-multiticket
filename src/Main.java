@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -54,41 +55,31 @@ public class Main {
                 SeatTo seatTo;
 
                 for (int i = 0; i < seatList.size(); i++) {
+                    List<String> seats = new ArrayList<>();
                     if ("A".equalsIgnoreCase(seatList.get(i).getStatus())) {
-                        seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel()
-                                , Collections.singletonList(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo()));
-
-                        //reserve booking
-                        handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, zoneId, seatTo, Collections.singletonList(null));
-                        HttpRequest handlerReserveRequestBody = HttpRequest.newBuilder()
-                                .uri(URI.create("https://api.allticket.com/booking/handler-reserve"))
-                                .header("Authorization", token)
-                                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(handlerReserveRequest).toString()))
-                                .build();
-                        HttpResponse<String> handlerReserveResponseBody = HttpClient.newHttpClient().send(handlerReserveRequestBody, HttpResponse.BodyHandlers.ofString());
-                        handlerReserveResponse = gson.fromJson(handlerReserveResponseBody.body(), HandlerReserveResponse.class);
-                        System.out.println("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + seatList.get(i).getSeatNo() + " ว่างอยู่ กำลังจอง...");
-
-                        //Thread.sleep(5000);
-
-                        //check booking
-                        checkBookingRequest = new CheckBookingRequest(handlerReserveResponse.getData().getUuid());
-                        HttpRequest checkBookingRequestBody = HttpRequest.newBuilder()
-                                .uri(URI.create("https://api.allticket.com/booking/check-booking"))
-                                .header("Authorization", token)
-                                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(checkBookingRequest).toString()))
-                                .build();
-                        HttpResponse<String> checkBookingResponseBody = HttpClient.newHttpClient().send(checkBookingRequestBody, HttpResponse.BodyHandlers.ofString());
-                        checkBookingResponse = gson.fromJson(checkBookingResponseBody.body(), CheckBookingResponse.class);
-
-                        if ("100".equalsIgnoreCase(checkBookingResponse.getCode())) {
-                            throw new Exception("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + seatList.get(i).getSeatNo() + " ทำการจองสำเร็จ!!");
-                        } else if ("51002".equalsIgnoreCase(checkBookingResponse.getCode())) {
-                            throw new Exception("ทำรายการเร็วเกินไป");
-                        } else if ("51000".equalsIgnoreCase(checkBookingResponse.getCode())) {
-                            throw new Exception("มีตั๋วในระบบเกิน 4 ใบ");
+                        if ("1".equalsIgnoreCase(seatList.get(i).getSeatNo())) {
+                            if ("A".equalsIgnoreCase(seatList.get(i+1).getStatus())) {
+                                seats.add(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo());
+                                seats.add(seatList.get(i+1).getRowName() + "_" + seatList.get(i+1).getSeatNo());
+                                seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel(), seats);
+                            }
+                        } else if (i == seatList.size()-1) {
+                            if ("A".equalsIgnoreCase(seatList.get(i-1).getStatus())) {
+                                seats.add(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo());
+                                seats.add(seatList.get(i-1).getRowName() + "_" + seatList.get(i-1).getSeatNo());
+                                seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel(), seats);
+                            }
+                        } else {
+                            if ("A".equalsIgnoreCase(seatList.get(i+1).getStatus())) {
+                                seats.add(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo());
+                                seats.add(seatList.get(i+1).getRowName() + "_" + seatList.get(i+1).getSeatNo());
+                                seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel(), seats);
+                            } else if ("A".equalsIgnoreCase(seatList.get(i-1).getStatus())) {
+                                seats.add(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo());
+                                seats.add(seatList.get(i-1).getRowName() + "_" + seatList.get(i-1).getSeatNo());
+                                seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel(), seats);
+                            }
                         }
-
                     }
                 }
             } catch (Exception e) {
