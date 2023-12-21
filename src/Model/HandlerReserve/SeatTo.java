@@ -8,4 +8,9 @@ import java.util.List;
 public class SeatTo {
     private String seatType;
     private List<String> seats;
+
+    public SeatTo(String seatType, List<String> seats) {
+        this.seatType = seatType;
+        this.seats = seats;
+    }
 }

@@ -1,11 +1,18 @@
 import Model.GetSeat.GetSeatRequest;
 import Model.GetSeat.GetSeatResponse;
+import Model.GetSeat.Seat;
+import Model.HandlerReserve.HandlerReserveRequest;
+import Model.HandlerReserve.SeatTo;
 import com.google.gson.Gson;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -33,6 +40,19 @@ public class Main {
 
             HttpResponse<String> getSeatResponseBody = HttpClient.newHttpClient().send(getSeatRequestBody, HttpResponse.BodyHandlers.ofString());
             getSeatResponse = gson.fromJson(getSeatResponseBody.body(), GetSeatResponse.class);
+
+            List<Seat> seatList = getSeatResponse.getData().getSeats_available().get(0).getSeat();
+            HandlerReserveRequest handlerReserveRequest;
+            SeatTo seatTo;
+
+            for (int i = 0; i < seatList.size(); i++) {
+                if ("A".equalsIgnoreCase(seatList.get(i).getStatus())) {
+                    seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel()
+                            , Collections.singletonList(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo()));
+
+                    handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, zoneId, seatTo, Collections.singletonList(null));
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
