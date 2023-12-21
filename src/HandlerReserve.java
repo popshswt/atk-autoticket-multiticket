@@ -4,6 +4,7 @@ import Model.HandlerReserve.HandlerReserveRequest;
 import Model.HandlerReserve.HandlerReserveResponse;
 import Model.HandlerReserve.SeatTo;
 import com.google.gson.Gson;
+import lombok.Data;
 
 import java.net.URI;
 import java.net.http.HttpClient;
