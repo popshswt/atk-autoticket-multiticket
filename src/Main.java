@@ -51,6 +51,7 @@ public class Main {
                             , Collections.singletonList(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo()));
 
                     handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, zoneId, seatTo, Collections.singletonList(null));
+
                 }
             }
         } catch (Exception e) {
