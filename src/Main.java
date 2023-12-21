@@ -67,9 +67,9 @@ public class Main {
                                 .build();
                         HttpResponse<String> handlerReserveResponseBody = HttpClient.newHttpClient().send(handlerReserveRequestBody, HttpResponse.BodyHandlers.ofString());
                         handlerReserveResponse = gson.fromJson(handlerReserveResponseBody.body(), HandlerReserveResponse.class);
-                        System.out.println("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo() + " ว่างอยู่ กำลังจอง...");
+                        System.out.println("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + seatList.get(i).getSeatNo() + " ว่างอยู่ กำลังจอง...");
 
-                        Thread.sleep(5000);
+                        //Thread.sleep(5000);
 
                         //check booking
                         checkBookingRequest = new CheckBookingRequest(handlerReserveResponse.getData().getUuid());
@@ -82,7 +82,11 @@ public class Main {
                         checkBookingResponse = gson.fromJson(checkBookingResponseBody.body(), CheckBookingResponse.class);
 
                         if ("100".equalsIgnoreCase(checkBookingResponse.getCode())) {
-                            throw new Exception("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo() + " ทำการจองสำเร็จ!!");
+                            throw new Exception("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + seatList.get(i).getSeatNo() + " ทำการจองสำเร็จ!!");
+                        } else if ("51002".equalsIgnoreCase(checkBookingResponse.getCode())) {
+                            throw new Exception("ทำรายการเร็วเกินไป");
+                        } else if ("51000".equalsIgnoreCase(checkBookingResponse.getCode())) {
+                            throw new Exception("มีตั๋วในระบบเกิน 4 ใบ");
                         }
 
                     }
