@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="google.code.gson" level="application" />
     <orderEntry type="library" name="projectlombok.lombok" level="application" />
+    <orderEntry type="library" name="atk-autoticket-lib" level="application" />
   </component>
 </module>
