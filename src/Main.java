@@ -2,6 +2,7 @@ import Model.GetSeat.GetSeatRequest;
 import Model.GetSeat.GetSeatResponse;
 import Model.GetSeat.Seat;
 import Model.HandlerReserve.HandlerReserveRequest;
+import Model.HandlerReserve.HandlerReserveResponse;
 import Model.HandlerReserve.SeatTo;
 import com.google.gson.Gson;
 
@@ -43,6 +44,7 @@ public class Main {
 
             List<Seat> seatList = getSeatResponse.getData().getSeats_available().get(0).getSeat();
             HandlerReserveRequest handlerReserveRequest;
+            HandlerReserveResponse handlerReserveResponse;
             SeatTo seatTo;
 
             for (int i = 0; i < seatList.size(); i++) {
@@ -51,6 +53,15 @@ public class Main {
                             , Collections.singletonList(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo()));
 
                     handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, zoneId, seatTo, Collections.singletonList(null));
+                    HttpRequest handlerReserveRequestBody = HttpRequest.newBuilder()
+                            .uri(URI.create("https://api.allticket.com/booking/handler-reserve"))
+                            .header("Authorization", token)
+                            .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(handlerReserveRequest).toString()))
+                            .build();
+                    HttpResponse<String> handlerReserveResponseBody = HttpClient.newHttpClient().send(handlerReserveRequestBody, HttpResponse.BodyHandlers.ofString());
+                    handlerReserveResponse = gson.fromJson(handlerReserveResponseBody.body(), HandlerReserveResponse.class);
+                    System.out.println("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo() + " ว่างอยู่ กำลังจอง...");
+
 
                 }
             }
