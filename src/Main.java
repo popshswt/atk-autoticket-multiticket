@@ -1,3 +1,5 @@
+import Model.CheckBooking.CheckBookingRequest;
+import Model.CheckBooking.CheckBookingResponse;
 import Model.GetSeat.GetSeatRequest;
 import Model.GetSeat.GetSeatResponse;
 import Model.GetSeat.Seat;
@@ -32,42 +34,62 @@ public class Main {
 
         GetSeatRequest getSeatRequest = new GetSeatRequest(performId, roundId, zoneId);
         GetSeatResponse getSeatResponse;
-        try {
-            HttpRequest getSeatRequestBody = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.allticket.com/booking/get-seat"))
-                    .header("Authorization", token)
-                    .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(getSeatRequest).toString()))
-                    .build();
 
-            HttpResponse<String> getSeatResponseBody = HttpClient.newHttpClient().send(getSeatRequestBody, HttpResponse.BodyHandlers.ofString());
-            getSeatResponse = gson.fromJson(getSeatResponseBody.body(), GetSeatResponse.class);
+        while (true) {
+            try {
+                HttpRequest getSeatRequestBody = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.allticket.com/booking/get-seat"))
+                        .header("Authorization", token)
+                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(getSeatRequest).toString()))
+                        .build();
 
-            List<Seat> seatList = getSeatResponse.getData().getSeats_available().get(0).getSeat();
-            HandlerReserveRequest handlerReserveRequest;
-            HandlerReserveResponse handlerReserveResponse;
-            SeatTo seatTo;
+                HttpResponse<String> getSeatResponseBody = HttpClient.newHttpClient().send(getSeatRequestBody, HttpResponse.BodyHandlers.ofString());
+                getSeatResponse = gson.fromJson(getSeatResponseBody.body(), GetSeatResponse.class);
 
-            for (int i = 0; i < seatList.size(); i++) {
-                if ("A".equalsIgnoreCase(seatList.get(i).getStatus())) {
-                    seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel()
-                            , Collections.singletonList(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo()));
+                List<Seat> seatList = getSeatResponse.getData().getSeats_available().get(0).getSeat();
+                HandlerReserveRequest handlerReserveRequest;
+                HandlerReserveResponse handlerReserveResponse;
+                CheckBookingRequest checkBookingRequest;
+                CheckBookingResponse checkBookingResponse;
+                SeatTo seatTo;
 
-                    handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, zoneId, seatTo, Collections.singletonList(null));
-                    HttpRequest handlerReserveRequestBody = HttpRequest.newBuilder()
-                            .uri(URI.create("https://api.allticket.com/booking/handler-reserve"))
-                            .header("Authorization", token)
-                            .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(handlerReserveRequest).toString()))
-                            .build();
-                    HttpResponse<String> handlerReserveResponseBody = HttpClient.newHttpClient().send(handlerReserveRequestBody, HttpResponse.BodyHandlers.ofString());
-                    handlerReserveResponse = gson.fromJson(handlerReserveResponseBody.body(), HandlerReserveResponse.class);
-                    System.out.println("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo() + " ว่างอยู่ กำลังจอง...");
+                for (int i = 0; i < seatList.size(); i++) {
+                    if ("A".equalsIgnoreCase(seatList.get(i).getStatus())) {
+                        seatTo = new SeatTo(getSeatResponse.getData().getSeats_available().get(0).getZoneSeatLabel()
+                                , Collections.singletonList(seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo()));
 
+                        //reserve booking
+                        handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, zoneId, seatTo, Collections.singletonList(null));
+                        HttpRequest handlerReserveRequestBody = HttpRequest.newBuilder()
+                                .uri(URI.create("https://api.allticket.com/booking/handler-reserve"))
+                                .header("Authorization", token)
+                                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(handlerReserveRequest).toString()))
+                                .build();
+                        HttpResponse<String> handlerReserveResponseBody = HttpClient.newHttpClient().send(handlerReserveRequestBody, HttpResponse.BodyHandlers.ofString());
+                        handlerReserveResponse = gson.fromJson(handlerReserveResponseBody.body(), HandlerReserveResponse.class);
+                        System.out.println("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo() + " ว่างอยู่ กำลังจอง...");
 
+                        Thread.sleep(5000);
+
+                        //check booking
+                        checkBookingRequest = new CheckBookingRequest(handlerReserveResponse.getData().getUuid());
+                        HttpRequest checkBookingRequestBody = HttpRequest.newBuilder()
+                                .uri(URI.create("https://api.allticket.com/booking/check-booking"))
+                                .header("Authorization", token)
+                                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(checkBookingRequest).toString()))
+                                .build();
+                        HttpResponse<String> checkBookingResponseBody = HttpClient.newHttpClient().send(checkBookingRequestBody, HttpResponse.BodyHandlers.ofString());
+                        checkBookingResponse = gson.fromJson(checkBookingResponseBody.body(), CheckBookingResponse.class);
+
+                        if ("100".equalsIgnoreCase(checkBookingResponse.getCode())) {
+                            throw new Exception("โซน " + zoneId + " ที่นั่ง " + seatList.get(i).getRowName() + "_" + seatList.get(i).getSeatNo() + " ทำการจองสำเร็จ!!");
+                        }
+
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
     }
 }
