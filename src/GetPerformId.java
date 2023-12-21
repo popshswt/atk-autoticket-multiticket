@@ -2,12 +2,14 @@ import Model.GetHome.DataItem;
 import Model.GetHome.GetHomeResponse;
 import Model.GetHome.HomeData;
 import com.google.gson.Gson;
+import lombok.Data;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
 
 
 public class GetPerformId {
@@ -37,5 +39,6 @@ public class GetPerformId {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            return "Not fetch";
     }
 }
