@@ -11,5 +11,6 @@ public class SeatAvailable {
     private String zoneSeatLabel;
     private String zoneId;
     private String screenLabel;
+    private String priceAmt;
     private List<Seat> seat;
 }

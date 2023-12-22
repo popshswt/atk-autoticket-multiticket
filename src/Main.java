@@ -24,6 +24,7 @@ public class Main {
         String performId = new GetPerformId().getPerformIdFromUri(performUri);
         String roundId = "R1";
         String zoneId = "D";
+        String priceAmt = "3320";
         String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBvcF9sb3ZlX2x5X2RheUBob3RtYWlsLmNvbSIsInVybGJhY2siOiJ3d3cuYWxsdGlja2V0LmNvbSIsInBheW1lbnRDaGFubmVsIjoiQzA3IiwidGlja2V0VHlwZSI6IjAxIiwibGFuZyI6IkUiLCJkYXRhIjoiN2NjMjhlODUzYzNkNzZkMDRkYWQzNGMwNTFhYjYwMDM3YzU0YmJjNzI3ZjU0ODkyNjE4MmM5ZDljN2YzOWNlNGViOTM5ZDUzMzc4NzJiODlkNmY2OTk3ZDc2N2RjMzMwNTFlYzY3NTE1OGY0ZTdlMjZlZDI2OGRkMWQ3OTRjYWYxOGJhZTJjODk5NzZkNzczOTBiYmY2MmYzMjE1MGVmYmZhYTE0ZjEzYzA2MTQxY2IyZGY5MmE1ODAxYjE2ODhiOWE1NDJlOTYwMjU2OWViOWYxODk3MTYzODU4OGEwMDIzZTNjMjczNGIyN2UwMDJjZTY4YjMzMTc0N2NmN2QzOTUyMDZmYzY5MGU1ZjNmZjFmYTVkYjcyOTI1MjQwY2I1YmFkYmJjYzkxMGExYjc3ZTNhNmE0NmRjOWJiM2U5NThkZGZhNzZiNGZlMjBhZThkMjEyOTlkYzI4NTIwZmE4ZDEwNDZlMTc3Zjg5Njc2NWRiOGQ2ZmIwOGIzNDAzZjc4YzE5ZWI2MDY4NTZiMWFlYTU3NGU1NjY0MTczMWYzZGUzMzM1NWQ5MGM5NjU5MzI0MGI5NGE1NTllNDQyYjBjZjZiOWExY2M2MWYyNmI2NjQ2ZjQyZDBmOGY1OGFjZTBlZTg3MmYyNzU0OWI5ZmNiMTc3MDJkZmVmNTI5MzMyNzM2ZjhiNzM3ODVlYTRkNTY4YzAyNTUxZTNkYzFiYTQ3OTE1OGNlYjliNzFlODNmMDljNzYwNDgzYjU5ZDRhZDg1ZmZlYjRmOTA2ZjQ5NjM3Mjk1MzMzNmE0YTNjN2Q5ZWUxYzc0ZTk1ZTYzMTQ5N2E3NzYxZTNiZjU1YjFlZDc0Nzg3NDIwZjUyNzgzYWEyM2JkYmI2MWMyMGNmNDYyZDQxNmMzMjYxYTFiY2ZiMmUyZTlhN2U1NzhlNzY3ZGE1Mjc1NDg5OGVjNmZhYWZiODFjODAxMGQzN2ZjYTBhNDQ5NGUwOGViOWVkN2M4YThlZjk3ZjU0ZDM3NDc5ODQ4MmUwMzBmMDFjYzY1YThlMmIyYThlNTE5YmE2ZmI4MzAyZjk0YzE2ZTZmMDA4YTdjMTNkNmJkZDc1MTcwMTEwMWI1MWVmMWM3M2I1NWRmMWU3ZDUwNzg3MGQ3ZDkxN2Y5N2M2M2Y2NGQ4NmI3Mjk5ZmRiOWNmMzE4ZWRmNTY1NGExOTI4MjgwYWM4OGE0MzBkN2UyYTI4NzUwNGZmY2FhZGQ4ZiIsInRpbWVTdGFtcCI6MC4yOTczNzQ5MDI0NjIxMjYxNywiaWF0IjoxNzAzMjIzNzQ1LCJleHAiOjE3MDMyMzQ1NDUsImlzcyI6ImNzYXRrMTgifQ.XyjMwyLGJ-Nuxz6YE5Y8M-7HQb2mQ7XHTuUs6LYSwZU";
 
         while ("99998".equalsIgnoreCase(performId)) {
@@ -53,7 +54,14 @@ public class Main {
                     getSeatResponse = gson.fromJson(getSeatResponseBody.body(), GetSeatResponse.class);
                 }
 
-                List<Seat> seatList = getSeatResponse.getData().getSeats_available().get(1).getSeat();
+                List<Seat> seatList = new ArrayList<>();
+
+                for (int i = 0; i < getSeatResponse.getData().getSeats_available().size(); i++) {
+                    if (priceAmt.equalsIgnoreCase(getSeatResponse.getData().getSeats_available().get(i).getPriceAmt())) {
+                        seatList = getSeatResponse.getData().getSeats_available().get(i).getSeat();
+                    }
+                }
+
                 HandlerReserveRequest handlerReserveRequest;
                 HandlerReserveResponse handlerReserveResponse;
                 CheckBookingRequest checkBookingRequest;
