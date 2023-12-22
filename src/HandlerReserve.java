@@ -20,10 +20,10 @@ public class HandlerReserve {
     CheckBookingResponse checkBookingResponse;
 
 
-    public void handlerReserveBooking(String performId, String roundId, String zoneId, SeatTo seatTo, String token) {
+    public void handlerReserveBooking(String performId, String roundId, String zoneId, String screenLabel, SeatTo seatTo, String token) {
         try {
             //reserve booking
-            handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, zoneId, seatTo, Collections.singletonList(null));
+            handlerReserveRequest = new HandlerReserveRequest(performId, roundId, zoneId, screenLabel, seatTo, Collections.singletonList(null));
             HttpRequest handlerReserveRequestBody = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.allticket.com/booking/handler-reserve"))
                     .header("Authorization", token)

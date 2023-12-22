@@ -8,4 +8,5 @@ public class Seat {
     private String rowName;
     private String status;
     private String zoneId;
+    private String colNo;
 }
